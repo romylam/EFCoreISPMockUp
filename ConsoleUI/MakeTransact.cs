@@ -8,29 +8,21 @@ namespace ConsoleUI
 {
     public interface IMakeTransact
     {
-        Transact TransactHouse(int houseId, int residentId, decimal amount);
+        Transact MakeTransact();
     }
-    public class BuyAHouse : IMakeTransact
+    public class MakeGeneralTransact : IMakeTransact
     {
-        public Transact TransactHouse(int houseId, int residentId, decimal amount)
+        public Transact MakeTransact()
         {
-            Transact buyHouse = new BuyHouse();
-            buyHouse.HouseId = houseId;
-            buyHouse.ResidentId = residentId;
-            buyHouse.BuyOrRent = "Buy";
-            buyHouse.Amount = amount;
+            Transact buyHouse = new GeneralTransact();
             return buyHouse;
         }
     }
-    public class RentAHouse : IMakeTransact
+    public class MakeTradingTransact : IMakeTransact
     {
-        public Transact TransactHouse(int houseId, int residentId, decimal amount)
+        public Transact MakeTransact()
         {
-            Transact rentHouse = new RentHouse();
-            rentHouse.HouseId = houseId;
-            rentHouse.ResidentId = residentId;
-            rentHouse.BuyOrRent = "Rent";
-            rentHouse.Amount = amount;
+            Transact rentHouse = new TradingTransact();
             return rentHouse;
         }
     }

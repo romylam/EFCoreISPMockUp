@@ -9,26 +9,25 @@ namespace ConsoleUI
     public class Transact
     {
         public int Id { get; set; }
-        public string BuyOrRent { get; set; }
+        public string Class { get; set; }
+        public DateTime Date { get; set; }
+        public string Payee { get; set; }
         public decimal Amount { get; set; }
-        public int ResidentId { get; set; }
-        public Resident Resident { get; set; }
-        public int HouseId { get; set; }
-        public House House { get; set; }
-        public string ActualTransact { get; set; }
+        public int AccountId { get; set; }
+        public Account Account { get; set; }
     }
-    public class BuyHouse : Transact
+    public class GeneralTransact : Transact
     {
-        public BuyHouse()
+        public GeneralTransact()
         {
-            ActualTransact = "Sold";
-        }
+            Class = "General";
+        }    
     }
-    public class RentHouse : Transact
+    public class TradingTransact : Transact
     {
-        public RentHouse()
+        public TradingTransact()
         {
-            ActualTransact = "Rent";
+            Class = "Trading";
         }
     }
 }
