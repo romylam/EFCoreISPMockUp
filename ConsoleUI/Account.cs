@@ -10,36 +10,31 @@ namespace ConsoleUI
     public class Account : Common
     {
         public string Class { get; set; }
+        public string Name { get; set; }
         public decimal Open { get; set; } = 0;
         public decimal Debit { get; set; } = 0;
         public decimal Credit { get; set; } = 0;
         public decimal Transfer { get; set; } = 0;
-        public string Symbol { get; set; }
-        public decimal Price { get; set; } = 0;
-        public DateTime DateOfPrice { get; set; }
         [NotMapped]
         public decimal Balance { get { return Open + Debit + Credit + Transfer; } }
         [NotMapped]
-        public decimal Worth { get; set; }
+        public virtual decimal Worth { get { return Balance; } }
         [NotMapped]
-        public string OnDisplay { get; set; }
+        public virtual string OnDisplay { get { return $"{Worth:c2}"; } }
     }
-    public class GeneralAccount : Account
+    public class CreditAccount : Account
     {
-        public GeneralAccount()
-        {
-            Class = "General";
-            Worth = Balance;
-            OnDisplay = $"{Worth:c2}";
-        }
+        public decimal Limit { get; set; }
+        public override string OnDisplay { get { return $"{Worth:c2} against limit of {Limit:c2}"; } }
     }
     public class TradingAccount : Account
     {
-        public TradingAccount()
-        {
-            Class = "Trading";
-            Worth = Balance * Price;
-            OnDisplay = $"{Balance} share(s) worth {Worth:c2}";
-        }
+        public string Symbol { get; set; }
+        public decimal Price { get; set; }
+        public DateTime PriceDate { get; set; }
+        [NotMapped]
+        public override decimal Worth { get { return Balance * Price; } }
+        [NotMapped]
+        public override string OnDisplay {  get { return $"{Balance:n0} unit(s) @{Price:c2} value {Worth:c2}"; } }
     }
 }
