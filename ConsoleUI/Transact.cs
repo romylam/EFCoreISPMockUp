@@ -7,38 +7,32 @@ using System.Threading.Tasks;
 
 namespace ConsoleUI
 {
-    public class Transact : Common
+    public class Transact : Common, ITransact
     {
-        public string Class { get; set; }
         public DateTime Date { get; set; }
         public string Payee { get; set; }
         public decimal Amount { get; set; }
-        public decimal Unit { get; set; }
-        public decimal Price { get; set; }
-        public DateTime PriceDate { get; set; }
         public int AccountId { get; set; }
         public Account Account { get; set; }
         [NotMapped]
-        public string OnDisplay
+        public virtual string OnDisplay { get; }
+    }
+    public class GeneralTransact : Transact, ITransact
+    {
+        public override string OnDisplay
         {
-            get
-            {
-                switch (Class)
-                {
-                    case "General":
-                        if (Amount > 0)
-                            return $"Credited {Amount:c2} into {Account.Name}";
-                        else
-                            return $"Debited {Amount:c2} from {Account.Name}";
-                    case "Trading":
-                        if (Unit > 0)
-                            return $"Bought {Unit:n0} unit(s) of {Account.Name} @{Price:c2} valued {Amount:c2}";
-                        else
-                            return $"Sold {Unit:n0} unit(s) of {Account.Name} @{Price:c2} valued {Amount:c2}";
-                    default:
-                        return string.Empty;
-                }
-            }
+            get { return Amount > 0 ? $"Credited {Amount:c2} into {Account.Name}" : $"Debited {Amount:c2} from { Account.Name}"; }
         }
+    }
+    public class TradingTransact : Transact, ITransact
+    {
+        public decimal Unit { get; set; }
+        public decimal Price { get; set; }
+        public DateTime PriceDate { get; set; }
+        public override string OnDisplay
+        {
+            get { return Unit > 0 ? $"Bought {Unit:n0} unit(s) of {Account.Name} @{Price:c2} valued {Amount:c2}" : $"Sold {Unit:n0} unit(s) of {Account.Name} @{Price:c2} valued {Amount:c2}"; }
+        }
+
     }
 }

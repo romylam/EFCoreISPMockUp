@@ -15,8 +15,11 @@ namespace ConsoleUI
         public DbSet<Transact> Transacts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<GeneralAccount>();
             modelBuilder.Entity<CreditAccount>();
             modelBuilder.Entity<TradingAccount>();
+            modelBuilder.Entity<GeneralTransact>();
+            modelBuilder.Entity<TradingTransact>();
         }
     }
     public class dbContextFactory : IDesignTimeDbContextFactory<dbContext>

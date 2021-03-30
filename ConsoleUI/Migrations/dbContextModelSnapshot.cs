@@ -22,9 +22,6 @@ namespace ConsoleUI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Class")
-                        .HasColumnType("TEXT");
-
                     b.Property<decimal>("Credit")
                         .HasColumnType("TEXT");
 
@@ -63,22 +60,14 @@ namespace ConsoleUI.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Class")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Payee")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("PriceDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Unit")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -86,6 +75,8 @@ namespace ConsoleUI.Migrations
                     b.HasIndex("AccountId");
 
                     b.ToTable("Transacts");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Transact");
                 });
 
             modelBuilder.Entity("ConsoleUI.CreditAccount", b =>
@@ -96,6 +87,13 @@ namespace ConsoleUI.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasDiscriminator().HasValue("CreditAccount");
+                });
+
+            modelBuilder.Entity("ConsoleUI.GeneralAccount", b =>
+                {
+                    b.HasBaseType("ConsoleUI.Account");
+
+                    b.HasDiscriminator().HasValue("GeneralAccount");
                 });
 
             modelBuilder.Entity("ConsoleUI.TradingAccount", b =>
@@ -112,6 +110,29 @@ namespace ConsoleUI.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasDiscriminator().HasValue("TradingAccount");
+                });
+
+            modelBuilder.Entity("ConsoleUI.GeneralTransact", b =>
+                {
+                    b.HasBaseType("ConsoleUI.Transact");
+
+                    b.HasDiscriminator().HasValue("GeneralTransact");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TradingTransact", b =>
+                {
+                    b.HasBaseType("ConsoleUI.Transact");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PriceDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Unit")
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("TradingTransact");
                 });
 
             modelBuilder.Entity("ConsoleUI.Transact", b =>
