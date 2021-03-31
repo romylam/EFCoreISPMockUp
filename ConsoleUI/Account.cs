@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleUI
 {
-    public class Account : Common
+    public class Account : Common, IAccount
     {
         public string Name { get; set; }
         public decimal Open { get; set; } = 0;
@@ -21,18 +21,18 @@ namespace ConsoleUI
         [NotMapped]
         public virtual string OnDisplay { get; }
     }
-    public class GeneralAccount : Account
+    public class GeneralAccount : Account, IAccount
     {
         public override decimal Worth { get { return Balance; } }
         public override string OnDisplay { get { return $"{Worth:c2}"; } }
     }
-    public class CreditAccount : Account
+    public class CreditAccount : Account, IAccount
     {
         public decimal Limit { get; set; }
         public override decimal Worth { get { return Balance; } }
         public override string OnDisplay { get { return $"{Worth:c2} against limit of {Limit:c2}"; } }
     }
-    public class TradingAccount : Account
+    public class TradingAccount : Account, IAccount
     {
         public string Symbol { get; set; }
         public decimal Price { get; set; }

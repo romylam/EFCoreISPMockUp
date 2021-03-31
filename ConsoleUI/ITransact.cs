@@ -8,11 +8,11 @@ namespace ConsoleUI
 {
     public interface ITransact
     {
+        int Id { get; set; }
         DateTime Date { get; set; }
         string Payee { get; set; }
         decimal Amount { get; set; }
         int AccountId { get; set; }
         Account Account { get; set; }
-        string OnDisplay { get; }
     }
 }

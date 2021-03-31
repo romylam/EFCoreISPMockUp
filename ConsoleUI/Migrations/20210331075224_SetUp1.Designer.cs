@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleUI.Migrations
 {
     [DbContext(typeof(dbContext))]
-    [Migration("20210330074509_SetUp1")]
+    [Migration("20210331075224_SetUp1")]
     partial class SetUp1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,10 +65,6 @@ namespace ConsoleUI.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Payee")
                         .HasColumnType("TEXT");
 
@@ -77,8 +73,34 @@ namespace ConsoleUI.Migrations
                     b.HasIndex("AccountId");
 
                     b.ToTable("Transacts");
+                });
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Transact");
+            modelBuilder.Entity("ConsoleUI.TransactDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TransactId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TransactId");
+
+                    b.ToTable("TransactDetails");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("TransactDetail");
                 });
 
             modelBuilder.Entity("ConsoleUI.CreditAccount", b =>
@@ -114,16 +136,32 @@ namespace ConsoleUI.Migrations
                     b.HasDiscriminator().HasValue("TradingAccount");
                 });
 
-            modelBuilder.Entity("ConsoleUI.GeneralTransact", b =>
+            modelBuilder.Entity("ConsoleUI.ForexTransactDetail", b =>
                 {
-                    b.HasBaseType("ConsoleUI.Transact");
+                    b.HasBaseType("ConsoleUI.TransactDetail");
 
-                    b.HasDiscriminator().HasValue("GeneralTransact");
+                    b.Property<decimal>("ForexAmount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ForexCurrency")
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("ForexTransactDetail");
                 });
 
-            modelBuilder.Entity("ConsoleUI.TradingTransact", b =>
+            modelBuilder.Entity("ConsoleUI.GeneralTransactDetail", b =>
                 {
-                    b.HasBaseType("ConsoleUI.Transact");
+                    b.HasBaseType("ConsoleUI.TransactDetail");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("GeneralTransactDetail");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
+                {
+                    b.HasBaseType("ConsoleUI.TransactDetail");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
@@ -131,10 +169,30 @@ namespace ConsoleUI.Migrations
                     b.Property<DateTime>("PriceDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("TradingAccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TradingId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Unit")
                         .HasColumnType("TEXT");
 
-                    b.HasDiscriminator().HasValue("TradingTransact");
+                    b.HasIndex("TradingAccountId");
+
+                    b.HasDiscriminator().HasValue("TradingTransactDetail");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TransferTransactDetail", b =>
+                {
+                    b.HasBaseType("ConsoleUI.TransactDetail");
+
+                    b.Property<int>("TransferId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasIndex("TransferId");
+
+                    b.HasDiscriminator().HasValue("TransferTransactDetail");
                 });
 
             modelBuilder.Entity("ConsoleUI.Transact", b =>
@@ -146,6 +204,40 @@ namespace ConsoleUI.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TransactDetail", b =>
+                {
+                    b.HasOne("ConsoleUI.Transact", null)
+                        .WithMany("TransactDetail")
+                        .HasForeignKey("TransactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
+                {
+                    b.HasOne("ConsoleUI.TradingAccount", "TradingAccount")
+                        .WithMany()
+                        .HasForeignKey("TradingAccountId");
+
+                    b.Navigation("TradingAccount");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TransferTransactDetail", b =>
+                {
+                    b.HasOne("ConsoleUI.Account", "Transfer")
+                        .WithMany()
+                        .HasForeignKey("TransferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Transfer");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Transact", b =>
+                {
+                    b.Navigation("TransactDetail");
                 });
 #pragma warning restore 612, 618
         }
