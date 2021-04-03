@@ -11,48 +11,47 @@ namespace ConsoleUI
         public delegate void ManageTransact(ITransact transact);
         static void Main(string[] args)
         {
+            Account savingsAccount = new GeneralAccount();
+            Account checkingAccount = new GeneralAccount();
+            Account creditAccount = new CreditAccount();
+            Account tradingAccount = new TradingAccount();
+            List<Account> accounts = new List<Account>();
+
+            List<Transact> transacts = new List<Transact>();
+            List<TransactDetail> transactDetails = new List<TransactDetail>();
+
             dbContextFactory factory = new dbContextFactory();
             dbContext context = factory.CreateDbContext();
 
             dbService<Account> accountDataService = new dbService<Account>(context);
-            List<Account> accounts = accountDataService.GetAll();
-            accountDataService.DeleteRange(accounts);
-            Account savingsAccount = new GeneralAccount { Name = "Acme Savings", Open = 1000 };
-            Account checkingAccount = new GeneralAccount { Name = "Acme Checking", Open = 0 };
-            Account creditAccount = new CreditAccount { Name = "Acme Credit", Open = 0, Limit = -5000 };
-            Account tradingAccount = new TradingAccount { Name = "Acme Shares", Symbol = "ACME", Open = 100, Price = 1.5M, PriceDate = DateTime.Today };
-            accountDataService.Add(savingsAccount);
-            accountDataService.Add(checkingAccount);
-            accountDataService.Add(creditAccount);
-            accountDataService.Add(tradingAccount);
-
-            Console.WriteLine("Accounts created.");
-            Console.WriteLine("");
+            //PurgeAccount(accountDataService, accounts);
+            //CreateAccount(accountDataService, savingsAccount, checkingAccount, creditAccount, tradingAccount);
 
             accounts = accountDataService.GetAll();
             ListAccount(accounts);
 
+            //ReadAccount(context, savingsAccount, checkingAccount, creditAccount, tradingAccount);
             savingsAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Savings"));
             checkingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Checking"));
             creditAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Credit"));
             tradingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Shares"));
 
+
             dbService<Transact> transactDataService = new dbService<Transact>(context);
-            List<Transact> transacts = transactDataService.GetAll();
-            transactDataService.DeleteRange(transacts);
+            PurgeTransact(transactDataService, transacts);
 
             dbService<TransactDetail> transactDetailDataService = new dbService<TransactDetail>(context);
-            List<TransactDetail> transactDetails = transactDetailDataService.GetAll();
+            transactDetails = transactDetailDataService.GetAll();
             transactDetailDataService.DeleteRange(transactDetails);
 
-            Transact t1 = new Transact { Date = DateTime.Today, Payee = "Acme Company", AccountId = savingsAccount.Id };
+            Transact t1 = new Transact { Date = DateTime.Today, Payee = "Top Company", AccountId = savingsAccount.Id };
             transactDataService.Add(t1);
             TransactDetail t1n1 = new GeneralTransactDetail { Order = 1, Amount = 2500, Category = "Salary", TransactId = t1.Id };
             transactDetailDataService.Add(t1n1);
             IMakeTransact makeTransact = new MakeGeneralTransact();
             makeTransact.MakeTransact(context, t1.Id);
 
-            Transact t2 = new Transact { Date = DateTime.Today, Payee = "Acme Store", AccountId = creditAccount.Id };
+            Transact t2 = new Transact { Date = DateTime.Today, Payee = "Excellent Store", AccountId = creditAccount.Id };
             transactDataService.Add(t2);
             TransactDetail t2n1 = new GeneralTransactDetail { Order = 1, Amount = -25, Category = "Milk", TransactId = t2.Id };
             transactDetailDataService.Add(t2n1);
@@ -61,7 +60,7 @@ namespace ConsoleUI
             makeTransact = new MakeGeneralTransact();
             makeTransact.MakeTransact(context, t2.Id);
 
-            Transact t3 = new Transact { Date = DateTime.Today, Payee = "Acme Forex", AccountId = checkingAccount.Id };
+            Transact t3 = new Transact { Date = DateTime.Today, Payee = "Sure Forex", AccountId = checkingAccount.Id };
             transactDataService.Add(t3);
             TransactDetail t3n1 = new ForexTransactDetail { Order = 1, Amount = 1350, ForexCurrency = "USD", ForexAmount = 1000, TransactId = t3.Id };
             transactDetailDataService.Add(t3n1);
@@ -72,13 +71,21 @@ namespace ConsoleUI
             makeTransact = new MakeGeneralTransact();
             makeTransact.MakeTransact(context, t3.Id);
 
-            Transact t4 = new Transact { Date = DateTime.Today, Payee = "Acme Exchange", AccountId = tradingAccount.Id };
+            Transact t4 = new Transact { Date = DateTime.Today, Payee = "Never Exchange", AccountId = tradingAccount.Id };
             transactDataService.Add(t4);
-
             TransactDetail t4n1 = new TradingTransactDetail { Order = 1, Unit = 150, Price = 1.75M, PriceDate = DateTime.Today.AddDays(1), TradingId = savingsAccount.Id, TransactId = t4.Id };
             transactDetailDataService.Add(t4n1);
             makeTransact = new MakeTradingTransact();
             makeTransact.MakeTransact(context, t4.Id);
+
+            Transact t5 = new Transact { Date = DateTime.Today, Payee = "Internal Transfer", AccountId = savingsAccount.Id };
+            transactDataService.Add(t5);
+            TransactDetail t5n1 = new TransferTransactDetail { Order = 1, Amount = 750, TransferId = checkingAccount.Id, TransactId = t5.Id };
+            transactDetailDataService.Add(t5n1);
+            makeTransact = new MakeTransferTransact();
+            makeTransact.MakeTransact(context, t5.Id);
+
+
 
             transacts = context.Transacts.Include(a => a.Account).Include(t => t.TransactDetail).ToList();
             ListTransact(transacts);
@@ -106,6 +113,40 @@ namespace ConsoleUI
                 Console.WriteLine("");
             }
             Console.WriteLine("");
+        }
+        private static void PurgeAccount(dbService<Account> accountDataService, List<Account> accounts)
+        {
+            accounts = accountDataService.GetAll();
+            accountDataService.DeleteRange(accounts);
+            Console.WriteLine("Accounts purged.");
+            Console.WriteLine("");
+        }
+        private static void PurgeTransact(dbService<Transact> transactDataService, List<Transact> transacts)
+        {
+            transacts = transactDataService.GetAll();
+            transactDataService.DeleteRange(transacts);
+            Console.WriteLine("Transactions purged.");
+            Console.WriteLine("");
+        }
+        private static void CreateAccount(dbService<Account> accountDataService, Account savingsAccount, Account checkingAccount, Account creditAccount, Account tradingAccount)
+        {
+            savingsAccount = new GeneralAccount { Name = "Acme Savings", Open = 1000 };
+            checkingAccount = new GeneralAccount { Name = "Acme Checking", Open = 0 };
+            creditAccount = new CreditAccount { Name = "Acme Credit", Open = 0, Limit = -5000 };
+            tradingAccount = new TradingAccount { Name = "Acme Shares", Symbol = "ACME", Open = 100, Price = 1.5M, PriceDate = DateTime.Today };
+            accountDataService.Add(savingsAccount);
+            accountDataService.Add(checkingAccount);
+            accountDataService.Add(creditAccount);
+            accountDataService.Add(tradingAccount);
+            Console.WriteLine("Accounts created.");
+            Console.WriteLine("");
+        }
+        private static void ReadAccount(dbContext context, Account savingsAccount, Account checkingAccount, Account creditAccount, Account tradingAccount)
+        {
+            savingsAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Savings"));
+            checkingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Checking"));
+            creditAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Credit"));
+            tradingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Shares"));
         }
     }
 }

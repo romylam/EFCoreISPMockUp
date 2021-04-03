@@ -30,8 +30,8 @@ namespace ConsoleUI
         public dbContext CreateDbContext(string[] args = null)
         {
             var optionsBuilder = new DbContextOptionsBuilder<dbContext>();
-            optionsBuilder.UseSqlite("Data Source=C:/myApps/data/TestLab.db");
-            //optionsBuilder.UseSqlite("Data Source=" + Environment.GetEnvironmentVariable("OneDriveConsumer").Replace("\\", "/") + "/AppData/anyData/TestLab.db");
+            //optionsBuilder.UseSqlite("Data Source=C:/myApps/data/TestLab.db");
+            optionsBuilder.UseSqlite("Data Source=" + Environment.GetEnvironmentVariable("OneDriveConsumer").Replace("\\", "/") + "/AppData/anyData/TestLab.db");
             return new dbContext(optionsBuilder.Options);
         }
     }

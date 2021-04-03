@@ -37,7 +37,31 @@ namespace ConsoleUI
     {
         public void MakeTransact(dbContext context, int transactId)
         {
-
+            Transact transact = context.Transacts.Find(transactId);
+            Account account = context.Accounts.Find(transact.AccountId);
+            Account transferAccount;
+            List<TransferTransactDetail> transactDetails = context.TransactDetails.OfType<TransferTransactDetail>().Where(t => t.TransactId.Equals(transact.Id)).ToList();
+            decimal totalAmount = 0;
+            foreach (var item in transactDetails)
+            {
+                transferAccount = context.Accounts.Find(item.TransferId);
+                totalAmount += item.Amount;
+                if (item.Amount > 0)
+                {
+                    account.Credit += item.Amount;
+                    transferAccount.Debit -= item.Amount;
+                }
+                else
+                {
+                    account.Debit += item.Amount;
+                    transferAccount.Credit -= item.Amount;
+                }
+                context.Accounts.Update(transferAccount);
+            }
+            transact.Amount = totalAmount;
+            context.Transacts.Update(transact);
+            context.Accounts.Update(account);
+            context.SaveChanges();
         }
     }
     public class MakeTradingTransact : IMakeTransact
@@ -68,6 +92,7 @@ namespace ConsoleUI
                     account.Debit += item.Unit;
                     tradingAccount.Credit -= totalAmount;
                 }
+                context.Accounts.Update(tradingAccount);
             }
             transact.Amount = totalUnit;
             context.Transacts.Update(transact);
