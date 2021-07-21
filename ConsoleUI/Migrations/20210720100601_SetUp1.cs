@@ -22,7 +22,7 @@ namespace ConsoleUI.Migrations
                     Limit = table.Column<decimal>(type: "TEXT", nullable: true),
                     Symbol = table.Column<string>(type: "TEXT", nullable: true),
                     Price = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PriceDate = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    PriceDate = table.Column<DateOnly>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -35,7 +35,7 @@ namespace ConsoleUI.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Date = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Date = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     Payee = table.Column<string>(type: "TEXT", nullable: true),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     AccountId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -66,7 +66,7 @@ namespace ConsoleUI.Migrations
                     Category = table.Column<string>(type: "TEXT", nullable: true),
                     Unit = table.Column<decimal>(type: "TEXT", nullable: true),
                     Price = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PriceDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    PriceDate = table.Column<DateOnly>(type: "TEXT", nullable: true),
                     TradingId = table.Column<int>(type: "INTEGER", nullable: true),
                     TradingAccountId = table.Column<int>(type: "INTEGER", nullable: true),
                     TransferId = table.Column<int>(type: "INTEGER", nullable: true)

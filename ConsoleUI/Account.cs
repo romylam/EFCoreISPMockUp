@@ -36,7 +36,7 @@ namespace ConsoleUI
     {
         public string Symbol { get; set; }
         public decimal Price { get; set; }
-        public DateTime PriceDate { get; set; }
+        public DateOnly PriceDate { get; set; }
         public override decimal Worth { get { return Balance * Price; } }
         public override string OnDisplay {  get { return $"{Balance:n0} unit(s) @{Price:c2} value {Worth:c2}"; } }
     }

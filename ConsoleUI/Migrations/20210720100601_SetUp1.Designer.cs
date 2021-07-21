@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleUI.Migrations
 {
     [DbContext(typeof(dbContext))]
-    [Migration("20210331075224_SetUp1")]
+    [Migration("20210720100601_SetUp1")]
     partial class SetUp1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.4");
+                .HasAnnotation("ProductVersion", "6.0.0-preview.6.21352.1");
 
             modelBuilder.Entity("ConsoleUI.Account", b =>
                 {
@@ -62,7 +62,7 @@ namespace ConsoleUI.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Payee")
@@ -127,7 +127,7 @@ namespace ConsoleUI.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("PriceDate")
+                    b.Property<DateOnly>("PriceDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Symbol")
@@ -166,7 +166,7 @@ namespace ConsoleUI.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("PriceDate")
+                    b.Property<DateOnly>("PriceDate")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("TradingAccountId")

@@ -9,7 +9,7 @@ namespace ConsoleUI
 {
     public class Transact : Common, ITransact
     {
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public string Payee { get; set; }
         public decimal Amount { get; set; }
         public int AccountId { get; set; }
@@ -80,7 +80,7 @@ namespace ConsoleUI
     {
         public decimal Unit { get; set; }
         public decimal Price { get; set; }
-        public DateTime PriceDate { get; set; }
+        public DateOnly PriceDate { get; set; }
         public int TradingId { get; set; }
         public TradingAccount TradingAccount { get; set; }
         public override string OnDisplay
