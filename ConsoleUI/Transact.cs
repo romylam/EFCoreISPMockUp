@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleUI
 {
-    public class Transact : Common, ITransact
+    public class Transact : ITransact
     {
         public DateOnly Date { get; set; }
         public string Payee { get; set; }
@@ -42,7 +42,7 @@ namespace ConsoleUI
     //        get { return Unit > 0 ? $"Bought {Unit:n0} unit(s) of {Account.Name} @{Price:c2} valued {Amount:c2}" : $"Sold {Unit:n0} unit(s) of {Account.Name} @{Price:c2} valued {Amount:c2}"; }
     //    }
     //}
-    public class TransactDetail : Common
+    public class TransactDetail
     {
         public int TransactId { get; set; }
         public int Order { get; set; }

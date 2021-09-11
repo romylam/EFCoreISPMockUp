@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -7,13 +8,17 @@ using System.Threading.Tasks;
 
 namespace ConsoleUI
 {
-    public class Account : Common, IAccount
+    public class Account : IAccount
     {
+        [Key]
+        public string Id { get; set; }
         public string Name { get; set; }
         public decimal Open { get; set; } = 0;
         public decimal Debit { get; set; } = 0;
         public decimal Credit { get; set; } = 0;
         public decimal Transfer { get; set; } = 0;
+        public string Status { get; set; } = "Active";
+        public bool Default { get; set; } = false;
         [NotMapped]
         public decimal Balance { get { return Open + Debit + Credit + Transfer; } }
         [NotMapped]

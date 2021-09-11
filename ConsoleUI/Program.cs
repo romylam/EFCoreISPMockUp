@@ -11,21 +11,45 @@ namespace ConsoleUI
         public delegate void ManageTransact(ITransact transact);
         static void Main(string[] args)
         {
+            switch (typeof(string).Assembly.GetName().ProcessorArchitecture)
+            {
+                case System.Reflection.ProcessorArchitecture.X86:
+                    Console.WriteLine("This is the Intel 32-bit Version");
+                    break;
+                case System.Reflection.ProcessorArchitecture.Amd64:
+                    Console.WriteLine("This is the Intel 64-bit Version");
+                    break;
+                case System.Reflection.ProcessorArchitecture.Arm:
+                    Console.WriteLine("This is the ARM 64-bit Version");
+                    break;
+                default:
+                    Console.WriteLine("Unknown CPU Architecture");
+                    break;
+            }
+            Console.WriteLine("");
+
+            MasterKey masterKey = new MasterKey();
+            List<MasterKey> masterKeys = new List<MasterKey>();
+
             Account savingsAccount = new GeneralAccount();
             Account checkingAccount = new GeneralAccount();
             Account creditAccount = new CreditAccount();
             Account tradingAccount = new TradingAccount();
             List<Account> accounts = new List<Account>();
 
-            List<Transact> transacts = new List<Transact>();
-            List<TransactDetail> transactDetails = new List<TransactDetail>();
+            //List<Transact> transacts = new List<Transact>();
+            //List<TransactDetail> transactDetails = new List<TransactDetail>();
 
             dbContextFactory factory = new dbContextFactory();
             dbContext context = factory.CreateDbContext();
 
+            dbService<MasterKey> masterKeyDataService = new dbService<MasterKey>(context);
+            PurgeMasterKey(masterKeyDataService, masterKeys);
+            CreateMasterKey(masterKeyDataService, masterKey);
+
             dbService<Account> accountDataService = new dbService<Account>(context);
-            //PurgeAccount(accountDataService, accounts);
-            //CreateAccount(accountDataService, savingsAccount, checkingAccount, creditAccount, tradingAccount);
+            PurgeAccount(accountDataService, accounts);
+            CreateAccount(context, accountDataService, savingsAccount, checkingAccount, creditAccount, tradingAccount);
 
             accounts = accountDataService.GetAll();
             ListAccount(accounts);
@@ -35,63 +59,63 @@ namespace ConsoleUI
             creditAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Credit"));
             tradingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Shares"));
 
-            dbService<Transact> transactDataService = new dbService<Transact>(context);
-            //PurgeTransact(transactDataService, transacts);
+            //dbService<Transact> transactDataService = new dbService<Transact>(context);
+            ////PurgeTransact(transactDataService, transacts);
 
-            dbService<TransactDetail> transactDetailDataService = new dbService<TransactDetail>(context);
-            //transactDetails = transactDetailDataService.GetAll();
-            //transactDetailDataService.DeleteRange(transactDetails);
+            //dbService<TransactDetail> transactDetailDataService = new dbService<TransactDetail>(context);
+            ////transactDetails = transactDetailDataService.GetAll();
+            ////transactDetailDataService.DeleteRange(transactDetails);
 
-            Transact t1 = new Transact { Date = DateOnly.FromDateTime(DateTime.Today), Payee = "Zen Company", AccountId = savingsAccount.Id };
-            transactDataService.Add(t1);
-            TransactDetail t1n1 = new GeneralTransactDetail { Order = 1, Amount = 1500, Category = "Salary", TransactId = t1.Id };
-            transactDetailDataService.Add(t1n1);
-            TransactDetail t1n2 = new GeneralTransactDetail { Order = 2, Amount = -150, Category = "Withholding Tax", TransactId = t1.Id };
-            transactDetailDataService.Add(t1n2);
-            TransactDetail t1n3 = new TransferTransactDetail { Order = 2, Amount = -1000, TransferId = checkingAccount.Id, TransactId = t1.Id };
-            transactDetailDataService.Add(t1n3);
-            PostTransact postTransact = new PostTransact();
-            postTransact.MakeTransact(context, t1.Id);
+            //Transact t1 = new Transact { Date = DateOnly.FromDateTime(DateTime.Today), Payee = "Zen Company", AccountId = savingsAccount.Id };
+            //transactDataService.Add(t1);
+            //TransactDetail t1n1 = new GeneralTransactDetail { Order = 1, Amount = 1500, Category = "Salary", TransactId = t1.Id };
+            //transactDetailDataService.Add(t1n1);
+            //TransactDetail t1n2 = new GeneralTransactDetail { Order = 2, Amount = -150, Category = "Withholding Tax", TransactId = t1.Id };
+            //transactDetailDataService.Add(t1n2);
+            //TransactDetail t1n3 = new TransferTransactDetail { Order = 2, Amount = -1000, TransferId = checkingAccount.Id, TransactId = t1.Id };
+            //transactDetailDataService.Add(t1n3);
+            //PostTransact postTransact = new PostTransact();
+            //postTransact.MakeTransact(context, t1.Id);
 
-            //Transact t2 = new Transact { Date = DateTime.Today, Payee = "Excellent Store", AccountId = creditAccount.Id };
-            //transactDataService.Add(t2);
-            //TransactDetail t2n1 = new GeneralTransactDetail { Order = 1, Amount = -25, Category = "Milk", TransactId = t2.Id };
-            //transactDetailDataService.Add(t2n1);
-            //TransactDetail t2n2 = new GeneralTransactDetail { Order = 2, Amount = -30, Category = "Fruits", TransactId = t2.Id };
-            //transactDetailDataService.Add(t2n2);
-            //makeTransact = new MakeGeneralTransact();
-            //makeTransact.MakeTransact(context, t2.Id);
+            ////Transact t2 = new Transact { Date = DateTime.Today, Payee = "Excellent Store", AccountId = creditAccount.Id };
+            ////transactDataService.Add(t2);
+            ////TransactDetail t2n1 = new GeneralTransactDetail { Order = 1, Amount = -25, Category = "Milk", TransactId = t2.Id };
+            ////transactDetailDataService.Add(t2n1);
+            ////TransactDetail t2n2 = new GeneralTransactDetail { Order = 2, Amount = -30, Category = "Fruits", TransactId = t2.Id };
+            ////transactDetailDataService.Add(t2n2);
+            ////makeTransact = new MakeGeneralTransact();
+            ////makeTransact.MakeTransact(context, t2.Id);
 
-            //Transact t3 = new Transact { Date = DateTime.Today, Payee = "Sure Forex", AccountId = checkingAccount.Id };
-            //transactDataService.Add(t3);
-            //TransactDetail t3n1 = new ForexTransactDetail { Order = 1, Amount = 1350, ForexCurrency = "USD", ForexAmount = 1000, TransactId = t3.Id };
-            //transactDetailDataService.Add(t3n1);
-            //TransactDetail t3n2 = new ForexTransactDetail { Order = 2, Amount = -865.92M, ForexCurrency = "HKD", ForexAmount = 5000, TransactId = t3.Id };
-            //transactDetailDataService.Add(t3n2);
-            //TransactDetail t3n3 = new ForexTransactDetail { Order = 3, Amount = 1020, ForexCurrency = "AUD", ForexAmount = 1000, TransactId = t3.Id };
-            //transactDetailDataService.Add(t3n3);
-            //makeTransact = new MakeGeneralTransact();
-            //makeTransact.MakeTransact(context, t3.Id);
+            ////Transact t3 = new Transact { Date = DateTime.Today, Payee = "Sure Forex", AccountId = checkingAccount.Id };
+            ////transactDataService.Add(t3);
+            ////TransactDetail t3n1 = new ForexTransactDetail { Order = 1, Amount = 1350, ForexCurrency = "USD", ForexAmount = 1000, TransactId = t3.Id };
+            ////transactDetailDataService.Add(t3n1);
+            ////TransactDetail t3n2 = new ForexTransactDetail { Order = 2, Amount = -865.92M, ForexCurrency = "HKD", ForexAmount = 5000, TransactId = t3.Id };
+            ////transactDetailDataService.Add(t3n2);
+            ////TransactDetail t3n3 = new ForexTransactDetail { Order = 3, Amount = 1020, ForexCurrency = "AUD", ForexAmount = 1000, TransactId = t3.Id };
+            ////transactDetailDataService.Add(t3n3);
+            ////makeTransact = new MakeGeneralTransact();
+            ////makeTransact.MakeTransact(context, t3.Id);
 
-            //Transact t4 = new Transact { Date = DateTime.Today, Payee = "Never Exchange", AccountId = tradingAccount.Id };
-            //transactDataService.Add(t4);
-            //TransactDetail t4n1 = new TradingTransactDetail { Order = 1, Unit = 150, Price = 1.75M, PriceDate = DateTime.Today.AddDays(1), TradingId = savingsAccount.Id, TransactId = t4.Id };
-            //transactDetailDataService.Add(t4n1);
-            //makeTransact = new MakeTradingTransact();
-            //makeTransact.MakeTransact(context, t4.Id);
+            ////Transact t4 = new Transact { Date = DateTime.Today, Payee = "Never Exchange", AccountId = tradingAccount.Id };
+            ////transactDataService.Add(t4);
+            ////TransactDetail t4n1 = new TradingTransactDetail { Order = 1, Unit = 150, Price = 1.75M, PriceDate = DateTime.Today.AddDays(1), TradingId = savingsAccount.Id, TransactId = t4.Id };
+            ////transactDetailDataService.Add(t4n1);
+            ////makeTransact = new MakeTradingTransact();
+            ////makeTransact.MakeTransact(context, t4.Id);
 
-            //Transact t5 = new Transact { Date = DateTime.Today, Payee = "Internal Transfer", AccountId = savingsAccount.Id };
-            //transactDataService.Add(t5);
-            //TransactDetail t5n1 = new TransferTransactDetail { Order = 1, Amount = 750, TransferId = checkingAccount.Id, TransactId = t5.Id };
-            //transactDetailDataService.Add(t5n1);
-            //makeTransact = new MakeTransferTransact();
-            //makeTransact.MakeTransact(context, t5.Id);
+            ////Transact t5 = new Transact { Date = DateTime.Today, Payee = "Internal Transfer", AccountId = savingsAccount.Id };
+            ////transactDataService.Add(t5);
+            ////TransactDetail t5n1 = new TransferTransactDetail { Order = 1, Amount = 750, TransferId = checkingAccount.Id, TransactId = t5.Id };
+            ////transactDetailDataService.Add(t5n1);
+            ////makeTransact = new MakeTransferTransact();
+            ////makeTransact.MakeTransact(context, t5.Id);
 
-            //transacts = context.Transacts.Include(a => a.Account).Include(t => t.TransactDetail).ToList();
-            //ListTransact(transacts);
+            ////transacts = context.Transacts.Include(a => a.Account).Include(t => t.TransactDetail).ToList();
+            ////ListTransact(transacts);
 
-            accounts = accountDataService.GetAll();
-            ListAccount(accounts);
+            //accounts = accountDataService.GetAll();
+            //ListAccount(accounts);
         }
         private static void ListAccount(List<Account> accounts)
         {
@@ -114,6 +138,13 @@ namespace ConsoleUI
             }
             Console.WriteLine("");
         }
+        private static void PurgeMasterKey(dbService<MasterKey> masterKeyDataService, List<MasterKey> masterKeys)
+        {
+            masterKeys = masterKeyDataService.GetAll();
+            masterKeyDataService.DeleteRange(masterKeys);
+            Console.WriteLine("Master Keys purged.");
+            Console.WriteLine("");
+        }
         private static void PurgeAccount(dbService<Account> accountDataService, List<Account> accounts)
         {
             accounts = accountDataService.GetAll();
@@ -128,12 +159,32 @@ namespace ConsoleUI
             Console.WriteLine("Transactions purged.");
             Console.WriteLine("");
         }
-        private static void CreateAccount(dbService<Account> accountDataService, Account savingsAccount, Account checkingAccount, Account creditAccount, Account tradingAccount)
+        private static void CreateMasterKey(dbService<MasterKey> masterKeyDataService, MasterKey masterKey)
         {
-            savingsAccount = new GeneralAccount { Name = "Acme Savings", Open = 1000 };
-            checkingAccount = new GeneralAccount { Name = "Acme Checking", Open = 0 };
-            creditAccount = new CreditAccount { Name = "Acme Credit", Open = 0, Limit = -5000 };
-            tradingAccount = new TradingAccount { Name = "Acme Shares", Symbol = "ACME", Open = 100, Price = 1.5M, PriceDate = DateOnly.FromDateTime(DateTime.Today) };
+            masterKey = new MasterKey { Id = "Account", Prefix = "AC", TwoFactor = false, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            masterKey = new MasterKey { Id = "Group", Prefix = "GP", TwoFactor = false, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            masterKey = new MasterKey { Id = "Type", Prefix = "TY", TwoFactor = false, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            masterKey = new MasterKey { Id = "Transact", Prefix = "TR", TwoFactor = true, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            masterKey = new MasterKey { Id = "Payee", Prefix = "PY", TwoFactor = false, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            masterKey = new MasterKey { Id = "Category", Prefix = "CT", TwoFactor = false, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            masterKey = new MasterKey { Id = "Tag", Prefix = "TG", TwoFactor = false, NextTerm = 0, NextKey = 0 };
+            masterKeyDataService.Add(masterKey);
+            Console.WriteLine("Master Keys created.");
+            Console.WriteLine("");
+        }
+        private static void CreateAccount(dbContext context, dbService<Account> accountDataService, Account savingsAccount, Account checkingAccount, Account creditAccount, Account tradingAccount)
+        {
+            savingsAccount = new GeneralAccount { Id = NextKey(context,"Account"), Name = "Acme Savings", Open = 1000 };
+            checkingAccount = new GeneralAccount { Id = NextKey(context, "Account"), Name = "Acme Checking", Open = 0 };
+            creditAccount = new CreditAccount { Id = NextKey(context, "Account"), Name = "Acme Credit", Open = 0, Limit = -5000 };
+            tradingAccount = new TradingAccount { Id = NextKey(context, "Account"), Name = "Acme Shares", Symbol = "ACME", Open = 100, 
+                Price = 1.5M, PriceDate = DateOnly.FromDateTime(DateTime.Today) };
             accountDataService.Add(savingsAccount);
             accountDataService.Add(checkingAccount);
             accountDataService.Add(creditAccount);
@@ -143,10 +194,34 @@ namespace ConsoleUI
         }
         private static void ReadAccount(dbContext context, Account savingsAccount, Account checkingAccount, Account creditAccount, Account tradingAccount)
         {
-            savingsAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Savings"));
-            checkingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Checking"));
-            creditAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Credit"));
-            tradingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Shares"));
+            //savingsAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Savings"));
+            //checkingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Checking"));
+            //creditAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Credit"));
+            //tradingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Shares"));
+        }
+        public static string NextKey(dbContext context, string id)
+        {
+            MasterKey masterKey = context.MasterKeys.Find(id);
+            string nextKey = string.Empty;
+            if (masterKey == null)
+                return "No Key";
+            if (masterKey.TwoFactor)
+            {
+                if (masterKey.NextTerm != DateTime.Today.Year)
+                {
+                    masterKey.NextTerm = DateTime.Today.Year;
+                    masterKey.NextKey = 0;
+                }
+                nextKey = masterKey.Prefix + (10000 + DateTime.Today.Year).ToString().Substring(1) + (1000001 + masterKey.NextKey).ToString().Substring(1);
+            }
+            else
+            {
+                nextKey = masterKey.Prefix + (1000001 + masterKey.NextKey).ToString().Substring(1);
+            }
+            masterKey.NextKey++;
+            context.MasterKeys.Update(masterKey);
+            context.SaveChanges();
+            return nextKey;
         }
     }
 }

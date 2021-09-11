@@ -13,6 +13,8 @@ namespace ConsoleUI
         decimal Debit { get; set; }
         decimal Credit { get; set; }
         decimal Transfer { get; set; }
+        string Status { get; set; }
+        bool Default { get; set; }
         decimal Balance { get; }
         decimal Worth { get; }
         string OnDisplay { get; }
