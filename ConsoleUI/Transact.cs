@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,12 @@ namespace ConsoleUI
 {
     public class Transact : ITransact
     {
+        [Key]
+        public string Id { get; set; }
         public DateOnly Date { get; set; }
         public string Payee { get; set; }
         public decimal Amount { get; set; }
-        public int AccountId { get; set; }
+        public string AccountId { get; set; }
         public Account Account { get; set; }
         public List<TransactDetail> TransactDetail { get; set; }
     }
@@ -44,8 +47,10 @@ namespace ConsoleUI
     //}
     public class TransactDetail
     {
-        public int TransactId { get; set; }
-        public int Order { get; set; }
+        [Key]
+        public string Id { get; set; }
+        public string TransactId { get; set; }
+        public string Order { get; set; }
         public decimal Amount { get; set; }
         [NotMapped]
         public virtual string OnDisplay { get; }
@@ -55,16 +60,25 @@ namespace ConsoleUI
         public string Category { get; set; }
         public override string OnDisplay
         {
-            get { return Amount > 0 ? $"Credited {Amount:c2} on {Category}" : $"Debited {Amount:c2} on {Category}"; }
+            get { return Amount > 0 ? $"Credited {Amount:c2} to {Category}" : $"Debited {Amount:c2} from {Category}"; }
+        }
+    }
+    public class CreditTransactDetail : GeneralTransactDetail
+    {
+        public override string OnDisplay
+        {
+            get { return Amount > 0 ? $"Credited {Amount:c2} from {Category}" : $"Charged {Amount:c2} on {Category}"; }
         }
     }
     public class TransferTransactDetail : TransactDetail
     {
-        public int TransferId { get; set; }
+        public string TransferId { get; set; }
         public Account Transfer { get; set; }
+        public string LinkId { get; set; }
+        public string LinkOrder { get; set; }
         public override string OnDisplay
         {
-            get { return Amount > 0 ? $"Credited {Amount:c2}" : $"Debited {Amount:c2}"; }
+            get { return Amount > 0 ? $"Transfered {Amount:c2} from {Transfer.Name}" : $"Transfered {Amount:c2} to {Transfer.Name}"; }
         }
     }
     public class ForexTransactDetail : TransactDetail
@@ -81,7 +95,7 @@ namespace ConsoleUI
         public decimal Unit { get; set; }
         public decimal Price { get; set; }
         public DateOnly PriceDate { get; set; }
-        public int TradingId { get; set; }
+        public string TradingId { get; set; }
         public TradingAccount TradingAccount { get; set; }
         public override string OnDisplay
         {

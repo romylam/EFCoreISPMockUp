@@ -11,7 +11,7 @@ namespace ConsoleUI
         DateOnly Date { get; set; }
         string Payee { get; set; }
         decimal Amount { get; set; }
-        int AccountId { get; set; }
+        string AccountId { get; set; }
         Account Account { get; set; }
     }
 }
