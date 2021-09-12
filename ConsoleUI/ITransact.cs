@@ -9,9 +9,11 @@ namespace ConsoleUI
     public interface ITransact
     {
         DateOnly Date { get; set; }
-        string Payee { get; set; }
+        string PayeeId { get; set; }
         decimal Amount { get; set; }
         string AccountId { get; set; }
+        Payee Payee { get; set; }
         Account Account { get; set; }
+
     }
 }

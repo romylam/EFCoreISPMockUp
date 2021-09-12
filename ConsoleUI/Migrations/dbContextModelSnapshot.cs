@@ -24,6 +24,9 @@ namespace ConsoleUI.Migrations
                     b.Property<decimal>("Credit")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CurrencyId")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Debit")
                         .HasColumnType("TEXT");
 
@@ -32,6 +35,9 @@ namespace ConsoleUI.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GroupId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -46,11 +52,65 @@ namespace ConsoleUI.Migrations
                     b.Property<decimal>("Transfer")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TypeId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Accounts");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Account");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Category", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Currency", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Currencies");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Group", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("ConsoleUI.MasterKey", b =>
@@ -75,6 +135,32 @@ namespace ConsoleUI.Migrations
                     b.ToTable("MasterKeys");
                 });
 
+            modelBuilder.Entity("ConsoleUI.Payee", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Payees");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Tag", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
             modelBuilder.Entity("ConsoleUI.Transact", b =>
                 {
                     b.Property<string>("Id")
@@ -89,12 +175,14 @@ namespace ConsoleUI.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Payee")
+                    b.Property<string>("PayeeId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
+
+                    b.HasIndex("PayeeId");
 
                     b.ToTable("Transacts");
                 });
@@ -111,8 +199,8 @@ namespace ConsoleUI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Order")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("TransactId")
                         .HasColumnType("TEXT");
@@ -124,6 +212,22 @@ namespace ConsoleUI.Migrations
                     b.ToTable("TransactDetails");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("TransactDetail");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Type", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Types");
                 });
 
             modelBuilder.Entity("ConsoleUI.CreditAccount", b =>
@@ -176,8 +280,10 @@ namespace ConsoleUI.Migrations
                 {
                     b.HasBaseType("ConsoleUI.TransactDetail");
 
-                    b.Property<string>("Category")
+                    b.Property<string>("CategoryId")
                         .HasColumnType("TEXT");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasDiscriminator().HasValue("GeneralTransactDetail");
                 });
@@ -213,11 +319,13 @@ namespace ConsoleUI.Migrations
                     b.Property<string>("LinkId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("LinkOrder")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("LinkOrder")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("TransferId")
                         .HasColumnType("TEXT");
+
+                    b.HasIndex("LinkId");
 
                     b.HasIndex("TransferId");
 
@@ -231,20 +339,58 @@ namespace ConsoleUI.Migrations
                     b.HasDiscriminator().HasValue("CreditTransactDetail");
                 });
 
+            modelBuilder.Entity("ConsoleUI.Account", b =>
+                {
+                    b.HasOne("ConsoleUI.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId");
+
+                    b.HasOne("ConsoleUI.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId");
+
+                    b.HasOne("ConsoleUI.Type", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Type");
+                });
+
             modelBuilder.Entity("ConsoleUI.Transact", b =>
                 {
                     b.HasOne("ConsoleUI.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId");
 
+                    b.HasOne("ConsoleUI.Payee", "Payee")
+                        .WithMany()
+                        .HasForeignKey("PayeeId");
+
                     b.Navigation("Account");
+
+                    b.Navigation("Payee");
                 });
 
             modelBuilder.Entity("ConsoleUI.TransactDetail", b =>
                 {
-                    b.HasOne("ConsoleUI.Transact", null)
+                    b.HasOne("ConsoleUI.Transact", "Transact")
                         .WithMany("TransactDetail")
                         .HasForeignKey("TransactId");
+
+                    b.Navigation("Transact");
+                });
+
+            modelBuilder.Entity("ConsoleUI.GeneralTransactDetail", b =>
+                {
+                    b.HasOne("ConsoleUI.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
@@ -258,9 +404,15 @@ namespace ConsoleUI.Migrations
 
             modelBuilder.Entity("ConsoleUI.TransferTransactDetail", b =>
                 {
+                    b.HasOne("ConsoleUI.Transact", "Link")
+                        .WithMany()
+                        .HasForeignKey("LinkId");
+
                     b.HasOne("ConsoleUI.Account", "Transfer")
                         .WithMany()
                         .HasForeignKey("TransferId");
+
+                    b.Navigation("Link");
 
                     b.Navigation("Transfer");
                 });

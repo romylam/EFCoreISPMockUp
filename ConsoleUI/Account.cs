@@ -12,6 +12,9 @@ namespace ConsoleUI
     {
         [Key]
         public string Id { get; set; }
+        public string GroupId { get; set; }
+        public string TypeId { get; set; }
+        public string CurrencyId { get; set; }
         public string Name { get; set; }
         public decimal Open { get; set; } = 0;
         public decimal Debit { get; set; } = 0;
@@ -19,6 +22,9 @@ namespace ConsoleUI
         public decimal Transfer { get; set; } = 0;
         public string Status { get; set; } = "Active";
         public bool Default { get; set; } = false;
+        public Group Group { get; set; }
+        public Type Type { get; set; }
+        public Currency Currency { get; set; }
         [NotMapped]
         public decimal Balance { get { return Open + Debit + Credit + Transfer; } }
         [NotMapped]

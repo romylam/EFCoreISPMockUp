@@ -76,48 +76,44 @@ namespace ConsoleUI
         {
             Account account = transact.Account;
             TransferTransactDetail transferTransactDetail = (TransferTransactDetail)transactDetail;
-            Account transferAccount = context.Accounts.Find(transferTransactDetail.TransferId);
-            Transact transferTransact = context.Transacts.Find(transferTransactDetail.LinkId);
             transact.Amount += transferTransactDetail.Amount;
-            transferTransact.Amount -= transferTransactDetail.Amount;
+            transferTransactDetail.Link.Amount -= transferTransactDetail.Amount;
             if (transferTransactDetail.Amount > 0)
             {
                 account.Transfer += transferTransactDetail.Amount;
-                transferAccount.Transfer -= transferTransactDetail.Amount;
+                transferTransactDetail.Transfer.Transfer -= transferTransactDetail.Amount;
             }
             else
             {
                 account.Transfer += transferTransactDetail.Amount;
-                transferAccount.Transfer -= transferTransactDetail.Amount;
+                transferTransactDetail.Transfer.Transfer -= transferTransactDetail.Amount;
             }
             context.Transacts.Update(transact);
-            context.Transacts.Update(transferTransact);
+            context.Transacts.Update(transferTransactDetail.Link);
             context.Accounts.Update(account);
-            context.Accounts.Update(transferAccount);
+            context.Accounts.Update(transferTransactDetail.Transfer);
             context.SaveChanges();
         }
         public void ReverseTransact(dbContext context, Transact transact, TransactDetail transactDetail)
         {
             Account account = transact.Account;
             TransferTransactDetail transferTransactDetail = (TransferTransactDetail)transactDetail;
-            Account transferAccount = context.Accounts.Find(transferTransactDetail.TransferId);
-            Transact transferTransact = context.Transacts.Find(transferTransactDetail.LinkId);
             transact.Amount -= transferTransactDetail.Amount;
-            transferTransact.Amount += transferTransactDetail.Amount;
+            transferTransactDetail.Link.Amount += transferTransactDetail.Amount;
             if (transferTransactDetail.Amount > 0)
             {
                 account.Transfer -= transferTransactDetail.Amount;
-                transferAccount.Transfer += transferTransactDetail.Amount;
+                transferTransactDetail.Transfer.Transfer += transferTransactDetail.Amount;
             }
             else
             {
                 account.Transfer -= transferTransactDetail.Amount;
-                transferAccount.Transfer += transferTransactDetail.Amount;
+                transferTransactDetail.Transfer.Transfer += transferTransactDetail.Amount;
             }
             context.Transacts.Update(transact);
-            context.Transacts.Update(transferTransact);
+            context.Transacts.Update(transferTransactDetail.Link);
             context.Accounts.Update(account);
-            context.Accounts.Update(transferAccount);
+            context.Accounts.Update(transferTransactDetail.Transfer);
             context.SaveChanges();
         }
     }

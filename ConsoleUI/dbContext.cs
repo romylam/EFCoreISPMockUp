@@ -12,6 +12,12 @@ namespace ConsoleUI
     {
         public dbContext(DbContextOptions<dbContext> options) : base(options) { }
         public DbSet<MasterKey> MasterKeys { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Type> Types { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
+        public DbSet<Payee> Payees { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Tag> Tags { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transact> Transacts { get; set; }
         public DbSet<TransactDetail> TransactDetails { get; set; }
