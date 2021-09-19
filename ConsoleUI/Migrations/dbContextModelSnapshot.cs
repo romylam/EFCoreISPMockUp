@@ -89,6 +89,9 @@ namespace ConsoleUI.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Prefix")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Rate")
                         .HasColumnType("TEXT");
 
@@ -148,6 +151,24 @@ namespace ConsoleUI.Migrations
                     b.ToTable("Payees");
                 });
 
+            modelBuilder.Entity("ConsoleUI.Subcategory", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CategoryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Subcategories");
+                });
+
             modelBuilder.Entity("ConsoleUI.Tag", b =>
                 {
                     b.Property<string>("Id")
@@ -173,6 +194,9 @@ namespace ConsoleUI.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Note")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PayeeId")
@@ -263,53 +287,25 @@ namespace ConsoleUI.Migrations
                     b.HasDiscriminator().HasValue("TradingAccount");
                 });
 
-            modelBuilder.Entity("ConsoleUI.ForexTransactDetail", b =>
-                {
-                    b.HasBaseType("ConsoleUI.TransactDetail");
-
-                    b.Property<decimal>("ForexAmount")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ForexCurrency")
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("ForexTransactDetail");
-                });
-
             modelBuilder.Entity("ConsoleUI.GeneralTransactDetail", b =>
                 {
                     b.HasBaseType("ConsoleUI.TransactDetail");
 
                     b.Property<string>("CategoryId")
-                        .HasColumnType("TEXT");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("CategoryId");
+
+                    b.Property<string>("SubcategoryId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SubcategoryId");
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("SubcategoryId");
+
                     b.HasDiscriminator().HasValue("GeneralTransactDetail");
-                });
-
-            modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
-                {
-                    b.HasBaseType("ConsoleUI.TransactDetail");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateOnly>("PriceDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TradingAccountId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TradingId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Unit")
-                        .HasColumnType("TEXT");
-
-                    b.HasIndex("TradingAccountId");
-
-                    b.HasDiscriminator().HasValue("TradingTransactDetail");
                 });
 
             modelBuilder.Entity("ConsoleUI.TransferTransactDetail", b =>
@@ -339,6 +335,47 @@ namespace ConsoleUI.Migrations
                     b.HasDiscriminator().HasValue("CreditTransactDetail");
                 });
 
+            modelBuilder.Entity("ConsoleUI.ForexTransactDetail", b =>
+                {
+                    b.HasBaseType("ConsoleUI.TransferTransactDetail");
+
+                    b.Property<decimal>("ForexAmount")
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("ForexTransactDetail");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TradingFromTransactDetail", b =>
+                {
+                    b.HasBaseType("ConsoleUI.TransferTransactDetail");
+
+                    b.Property<string>("CategoryId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("CategoryId");
+
+                    b.Property<string>("SubcategoryId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("SubcategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("SubcategoryId");
+
+                    b.HasDiscriminator().HasValue("TradingFromTransactDetail");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
+                {
+                    b.HasBaseType("ConsoleUI.TransferTransactDetail");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("TradingTransactDetail");
+                });
+
             modelBuilder.Entity("ConsoleUI.Account", b =>
                 {
                     b.HasOne("ConsoleUI.Currency", "Currency")
@@ -358,6 +395,15 @@ namespace ConsoleUI.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Subcategory", b =>
+                {
+                    b.HasOne("ConsoleUI.Category", "Category")
+                        .WithMany("Subcategory")
+                        .HasForeignKey("CategoryId");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("ConsoleUI.Transact", b =>
@@ -390,16 +436,13 @@ namespace ConsoleUI.Migrations
                         .WithMany()
                         .HasForeignKey("CategoryId");
 
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
-                {
-                    b.HasOne("ConsoleUI.TradingAccount", "TradingAccount")
+                    b.HasOne("ConsoleUI.Subcategory", "Subcategory")
                         .WithMany()
-                        .HasForeignKey("TradingAccountId");
+                        .HasForeignKey("SubcategoryId");
 
-                    b.Navigation("TradingAccount");
+                    b.Navigation("Category");
+
+                    b.Navigation("Subcategory");
                 });
 
             modelBuilder.Entity("ConsoleUI.TransferTransactDetail", b =>
@@ -415,6 +458,26 @@ namespace ConsoleUI.Migrations
                     b.Navigation("Link");
 
                     b.Navigation("Transfer");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TradingFromTransactDetail", b =>
+                {
+                    b.HasOne("ConsoleUI.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("ConsoleUI.Subcategory", "Subcategory")
+                        .WithMany()
+                        .HasForeignKey("SubcategoryId");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Subcategory");
+                });
+
+            modelBuilder.Entity("ConsoleUI.Category", b =>
+                {
+                    b.Navigation("Subcategory");
                 });
 
             modelBuilder.Entity("ConsoleUI.Transact", b =>

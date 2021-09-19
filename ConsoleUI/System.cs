@@ -7,43 +7,39 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ConsoleUI
 {
-    public class Group
+    public class Group : iKey
     {
-        [Key]
-        public string Id { get; set; }
         public int Order { get; set; }
         public string Name { get; set; }
     }
-    public class Type
+    public class Type : iKey
     {
-        [Key]
-        public string Id { get; set; }
         public int Order { get; set; }
         public string Name { get; set; }
     }
-    public class Currency
+    public class Currency : iKey
     {
-        [Key]
-        public string Id { get; set; }
         public string Name { get; set; }
+        public string Prefix { get; set; }
         public decimal Rate { get; set; }
     }
-    public class Payee
+    public class Payee : iKey
     {
-        [Key]
-        public string Id { get; set; }
         public string Name { get; set; }
     }
-    public class Category
+    public class Category : iKey
     {
-        [Key]
-        public string Id { get; set; }
         public string Name { get; set; }
+        public List<Subcategory> Subcategory { get; set; }
     }
-    public class Tag
+    public class Subcategory : iKey
     {
-        [Key]
-        public string Id { get; set; }
+        public string CategoryId { get; set; }
+        public string Name { get; set; }
+        public Category Category { get; set; }
+    }
+    public class Tag : iKey
+    {
         public string Name { get; set; }
     }
 }

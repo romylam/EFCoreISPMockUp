@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 
 namespace ConsoleUI
 {
-    public class MasterKey
+    public abstract class iKey
     {
         [Key]
         public string Id { get; set; }
+    }
+    public class MasterKey : iKey
+    {
         public string Prefix { get; set; }
         public bool TwoFactor { get; set; }
         public int NextTerm { get; set; }

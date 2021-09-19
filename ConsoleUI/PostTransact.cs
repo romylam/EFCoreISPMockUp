@@ -117,44 +117,107 @@ namespace ConsoleUI
             context.SaveChanges();
         }
     }
+    public class PostForexTransact : IPostTransact
+    {
+        public void PostTransact(dbContext context, Transact transact, TransactDetail transactDetail)
+        {
+            Account account = transact.Account;
+            ForexTransactDetail forexTransactDetail = (ForexTransactDetail)transactDetail;
+            transact.Amount += forexTransactDetail.Amount;
+            forexTransactDetail.Link.Amount -= forexTransactDetail.ForexAmount;
+            if (forexTransactDetail.Amount > 0)
+            {
+                account.Transfer += forexTransactDetail.Amount;
+                forexTransactDetail.Transfer.Transfer -= forexTransactDetail.ForexAmount;
+            }
+            else
+            {
+                account.Transfer += forexTransactDetail.Amount;
+                forexTransactDetail.Transfer.Transfer -= forexTransactDetail.ForexAmount;
+            }
+            context.Transacts.Update(transact);
+            context.Transacts.Update(forexTransactDetail.Link);
+            context.Accounts.Update(account);
+            context.Accounts.Update(forexTransactDetail.Transfer);
+            context.SaveChanges();
+        }
+        public void ReverseTransact(dbContext context, Transact transact, TransactDetail transactDetail)
+        {
+            Account account = transact.Account;
+            ForexTransactDetail forexTransactDetail = (ForexTransactDetail)transactDetail;
+            transact.Amount -= forexTransactDetail.Amount;
+            forexTransactDetail.Link.Amount += forexTransactDetail.ForexAmount;
+            if (forexTransactDetail.Amount > 0)
+            {
+                account.Transfer -= forexTransactDetail.Amount;
+                forexTransactDetail.Transfer.Transfer += forexTransactDetail.ForexAmount;
+            }
+            else
+            {
+                account.Transfer -= forexTransactDetail.Amount;
+                forexTransactDetail.Transfer.Transfer += forexTransactDetail.ForexAmount;
+            }
+            context.Transacts.Update(transact);
+            context.Transacts.Update(forexTransactDetail.Link);
+            context.Accounts.Update(account);
+            context.Accounts.Update(forexTransactDetail.Transfer);
+            context.SaveChanges();
+        }
+    }
     public class PostTradingTransact : IPostTransact
     {
         public void PostTransact(dbContext context, Transact transact, TransactDetail transactDetail)
         {
-            //Transact transact = context.Transacts.Find(transactId);
-            //TradingAccount account = context.Accounts.OfType<TradingAccount>().FirstOrDefault(x => x.Id.Equals(transact.AccountId));
-            //Account tradingAccount;
-            //List<TradingTransactDetail> transactDetails = context.TransactDetails.OfType<TradingTransactDetail>().Where(t => t.TransactId.Equals(transact.Id)).ToList();
-            //decimal totalUnit = 0;
-            //decimal totalAmount = 0;
-            //foreach (var item in transactDetails)
-            //{
-            //    totalUnit += item.Unit;
-            //    totalAmount = item.Price * item.Unit;
-            //    tradingAccount = context.Accounts.Find(item.TradingId);
-            //    account.Price = item.Price;
-            //    if (DateTime.Compare(account.PriceDate, item.PriceDate) < 0)
-            //        account.PriceDate = item.PriceDate;
-            //    if (item.Unit > 0)
-            //    {
-            //        account.Credit += item.Unit;
-            //        tradingAccount.Debit -= totalAmount;
-            //    }
-            //    else
-            //    {
-            //        account.Debit += item.Unit;
-            //        tradingAccount.Credit -= totalAmount;
-            //    }
-            //    context.Accounts.Update(tradingAccount);
-            //}
-            //transact.Amount = totalUnit;
-            //context.Transacts.Update(transact);
-            //context.Accounts.Update(account);
-            //context.SaveChanges();
+            TradingAccount account = (TradingAccount)transact.Account;
+            TradingTransactDetail tradingTransactDetail = (TradingTransactDetail)transactDetail;
+            transact.Amount += tradingTransactDetail.Amount;
+            tradingTransactDetail.Link.Amount -= tradingTransactDetail.Amount * tradingTransactDetail.Price;
+            if (account.PriceDate <  transact.Date)
+            {
+                account.Price = tradingTransactDetail.Price;
+                account.PriceDate = transact.Date;
+            }
+            if (account.PriceDate == transact.Date && account.Price != tradingTransactDetail.Price)
+            {
+                account.Price = tradingTransactDetail.Price;
+            }
+            if (tradingTransactDetail.Amount > 0)
+            {
+                account.Credit += tradingTransactDetail.Amount;
+                tradingTransactDetail.Transfer.Debit -= tradingTransactDetail.Amount * tradingTransactDetail.Price;
+            }
+            else
+            {
+                account.Credit -= tradingTransactDetail.Amount;
+                tradingTransactDetail.Transfer.Debit += tradingTransactDetail.Amount * tradingTransactDetail.Price;
+            }
+            context.Transacts.Update(transact);
+            context.Transacts.Update(tradingTransactDetail.Link);
+            context.Accounts.Update(account);
+            context.Accounts.Update(tradingTransactDetail.Transfer);
+            context.SaveChanges();
         }
         public void ReverseTransact(dbContext context, Transact transact, TransactDetail transactDetail)
         {
-
+            TradingAccount account = (TradingAccount)transact.Account;
+            TradingTransactDetail tradingTransactDetail = (TradingTransactDetail)transactDetail;
+            transact.Amount -= tradingTransactDetail.Amount;
+            tradingTransactDetail.Link.Amount += tradingTransactDetail.Amount * tradingTransactDetail.Price;
+            if (tradingTransactDetail.Amount > 0)
+            {
+                account.Credit -= tradingTransactDetail.Amount;
+                tradingTransactDetail.Transfer.Debit += tradingTransactDetail.Amount * tradingTransactDetail.Price;
+            }
+            else
+            {
+                account.Credit += tradingTransactDetail.Amount;
+                tradingTransactDetail.Transfer.Debit -= tradingTransactDetail.Amount * tradingTransactDetail.Price;
+            }
+            context.Transacts.Update(transact);
+            context.Transacts.Update(tradingTransactDetail.Link);
+            context.Accounts.Update(account);
+            context.Accounts.Update(tradingTransactDetail.Transfer);
+            context.SaveChanges();
         }
     }
 }

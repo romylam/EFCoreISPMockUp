@@ -25,6 +25,7 @@ namespace ConsoleUI.Migrations
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Prefix = table.Column<string>(type: "TEXT", nullable: true),
                     Rate = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -98,6 +99,25 @@ namespace ConsoleUI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Subcategories",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    CategoryId = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subcategories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Subcategories_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Accounts",
                 columns: table => new
                 {
@@ -149,7 +169,8 @@ namespace ConsoleUI.Migrations
                     Date = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     PayeeId = table.Column<string>(type: "TEXT", nullable: true),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
-                    AccountId = table.Column<string>(type: "TEXT", nullable: true)
+                    AccountId = table.Column<string>(type: "TEXT", nullable: true),
+                    Note = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -177,27 +198,17 @@ namespace ConsoleUI.Migrations
                     Order = table.Column<int>(type: "INTEGER", nullable: false),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    ForexCurrency = table.Column<string>(type: "TEXT", nullable: true),
-                    ForexAmount = table.Column<decimal>(type: "TEXT", nullable: true),
                     CategoryId = table.Column<string>(type: "TEXT", nullable: true),
-                    Unit = table.Column<decimal>(type: "TEXT", nullable: true),
-                    Price = table.Column<decimal>(type: "TEXT", nullable: true),
-                    PriceDate = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    TradingId = table.Column<string>(type: "TEXT", nullable: true),
-                    TradingAccountId = table.Column<string>(type: "TEXT", nullable: true),
+                    SubcategoryId = table.Column<string>(type: "TEXT", nullable: true),
                     TransferId = table.Column<string>(type: "TEXT", nullable: true),
                     LinkId = table.Column<string>(type: "TEXT", nullable: true),
-                    LinkOrder = table.Column<int>(type: "INTEGER", nullable: true)
+                    LinkOrder = table.Column<int>(type: "INTEGER", nullable: true),
+                    ForexAmount = table.Column<decimal>(type: "TEXT", nullable: true),
+                    Price = table.Column<decimal>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TransactDetails", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TransactDetails_Accounts_TradingAccountId",
-                        column: x => x.TradingAccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_TransactDetails_Accounts_TransferId",
                         column: x => x.TransferId,
@@ -208,6 +219,12 @@ namespace ConsoleUI.Migrations
                         name: "FK_TransactDetails_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TransactDetails_Subcategories_SubcategoryId",
+                        column: x => x.SubcategoryId,
+                        principalTable: "Subcategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -240,6 +257,11 @@ namespace ConsoleUI.Migrations
                 column: "TypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Subcategories_CategoryId",
+                table: "Subcategories",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TransactDetails_CategoryId",
                 table: "TransactDetails",
                 column: "CategoryId");
@@ -250,9 +272,9 @@ namespace ConsoleUI.Migrations
                 column: "LinkId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TransactDetails_TradingAccountId",
+                name: "IX_TransactDetails_SubcategoryId",
                 table: "TransactDetails",
-                column: "TradingAccountId");
+                column: "SubcategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TransactDetails_TransactId",
@@ -287,10 +309,13 @@ namespace ConsoleUI.Migrations
                 name: "TransactDetails");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Subcategories");
 
             migrationBuilder.DropTable(
                 name: "Transacts");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Accounts");

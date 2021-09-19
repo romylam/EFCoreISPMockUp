@@ -35,13 +35,13 @@ namespace ConsoleUI
     public class GeneralAccount : Account, IAccount
     {
         public override decimal Worth { get { return Balance; } }
-        public override string OnDisplay { get { return $"{Worth:c2}"; } }
+        public override string OnDisplay { get { return $"{Currency.Prefix}{Worth:n2}"; } }
     }
     public class CreditAccount : Account, IAccount
     {
         public decimal Limit { get; set; }
         public override decimal Worth { get { return Balance; } }
-        public override string OnDisplay { get { return $"{Worth:c2} against limit of {Limit:c2}"; } }
+        public override string OnDisplay { get { return $"{Currency.Prefix}{Worth:n2} against limit of {Currency.Prefix}{Limit:n2}"; } }
     }
     public class TradingAccount : Account, IAccount
     {
@@ -49,6 +49,6 @@ namespace ConsoleUI
         public decimal Price { get; set; }
         public DateOnly PriceDate { get; set; }
         public override decimal Worth { get { return Balance * Price; } }
-        public override string OnDisplay {  get { return $"{Balance:n0} unit(s) @{Price:c2} value {Worth:c2}"; } }
+        public override string OnDisplay {  get { return $"{Balance:n0} unit(s) @{Currency.Prefix}{Price:n2} value {Currency.Prefix}{Worth:n2}"; } }
     }
 }

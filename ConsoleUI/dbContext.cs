@@ -17,6 +17,7 @@ namespace ConsoleUI
         public DbSet<Currency> Currencies { get; set; }
         public DbSet<Payee> Payees { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Subcategory> Subcategories { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transact> Transacts { get; set; }
@@ -26,11 +27,22 @@ namespace ConsoleUI
             modelBuilder.Entity<GeneralAccount>();
             modelBuilder.Entity<CreditAccount>();
             modelBuilder.Entity<TradingAccount>();
-            modelBuilder.Entity<GeneralTransactDetail>();
+            modelBuilder.Entity<GeneralTransactDetail>()
+                .Property(c => c.CategoryId)
+                .HasColumnName(nameof(GeneralTransactDetail.CategoryId));
+            modelBuilder.Entity<GeneralTransactDetail>()
+                .Property(s => s.SubcategoryId)
+                .HasColumnName(nameof(GeneralTransactDetail.SubcategoryId));
             modelBuilder.Entity<CreditTransactDetail>();
             modelBuilder.Entity<TransferTransactDetail>();
             modelBuilder.Entity<ForexTransactDetail>();
             modelBuilder.Entity<TradingTransactDetail>();
+            modelBuilder.Entity<TradingFromTransactDetail>()
+                .Property(c => c.CategoryId)
+                .HasColumnName(nameof(TradingFromTransactDetail.CategoryId));
+            modelBuilder.Entity<TradingFromTransactDetail>()
+                .Property(s => s.SubcategoryId)
+                .HasColumnName(nameof(TradingFromTransactDetail.SubcategoryId));
         }
     }
     public class dbContextFactory : IDesignTimeDbContextFactory<dbContext>
