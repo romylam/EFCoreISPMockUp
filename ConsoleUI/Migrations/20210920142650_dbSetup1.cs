@@ -170,6 +170,7 @@ namespace ConsoleUI.Migrations
                     PayeeId = table.Column<string>(type: "TEXT", nullable: true),
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     AccountId = table.Column<string>(type: "TEXT", nullable: true),
+                    Reference = table.Column<string>(type: "TEXT", nullable: true),
                     Note = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -241,6 +242,31 @@ namespace ConsoleUI.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TransactTags",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    TransactId = table.Column<string>(type: "TEXT", nullable: true),
+                    TagId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransactTags", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TransactTags_Tags_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TransactTags_Transacts_TransactId",
+                        column: x => x.TransactId,
+                        principalTable: "Transacts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_CurrencyId",
                 table: "Accounts",
@@ -295,6 +321,16 @@ namespace ConsoleUI.Migrations
                 name: "IX_Transacts_PayeeId",
                 table: "Transacts",
                 column: "PayeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TransactTags_TagId",
+                table: "TransactTags",
+                column: "TagId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TransactTags_TransactId",
+                table: "TransactTags",
+                column: "TransactId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -303,13 +339,16 @@ namespace ConsoleUI.Migrations
                 name: "MasterKeys");
 
             migrationBuilder.DropTable(
-                name: "Tags");
-
-            migrationBuilder.DropTable(
                 name: "TransactDetails");
 
             migrationBuilder.DropTable(
+                name: "TransactTags");
+
+            migrationBuilder.DropTable(
                 name: "Subcategories");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Transacts");

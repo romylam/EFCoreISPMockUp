@@ -14,6 +14,7 @@ namespace ConsoleUI
         public string PayeeId { get; set; }
         public decimal Amount { get; set; }
         public string AccountId { get; set; }
+        public string Reference { get; set; }
         public string Note { get; set; }
         public Payee Payee { get; set; }
         public Account Account { get; set; }
@@ -26,6 +27,8 @@ namespace ConsoleUI
         public decimal Amount { get; set; }
         public Transact Transact { get; set; }
         [NotMapped]
+        public virtual string OnColumn { get; }
+        [NotMapped]
         public virtual string OnDisplay { get; }
     }
     public class GeneralTransactDetail : TransactDetail
@@ -34,18 +37,22 @@ namespace ConsoleUI
         public string SubcategoryId { get; set; }
         public Category Category { get; set; }
         public Subcategory Subcategory { get; set; }
+        public override string OnColumn
+        {
+            get { return string.IsNullOrEmpty(SubcategoryId) ? $"{Category.Name}" : $"{Category.Name}:{Subcategory.Name}"; }
+        }
         public override string OnDisplay
         {
-            get { return Amount > 0 ? $"Credited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} to {Category.Name} {Subcategory.Name}" : 
-                    $"Debited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {Category.Name} {Subcategory.Name}"; }
+            get { return Amount > 0 ? $"Credited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} to {OnColumn}" : 
+                    $"Debited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {OnColumn}"; }
         }
     }
     public class CreditTransactDetail : GeneralTransactDetail
     {
         public override string OnDisplay
         {
-            get { return Amount > 0 ? $"Credited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {Category.Name} {Subcategory.Name}" : 
-                    $"Charged {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} on {Category.Name} {Subcategory.Name}"; }
+            get { return Amount > 0 ? $"Credited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {OnColumn}" : 
+                    $"Charged {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} on {OnColumn}"; }
         }
     }
     public class TransferTransactDetail : TransactDetail
@@ -55,6 +62,10 @@ namespace ConsoleUI
         public string LinkId { get; set; }
         public Transact Link { get; set; }
         public int LinkOrder { get; set; }
+        public override string OnColumn
+        {
+            get { return Amount > 0 ? $"From {Transfer.Name}" : $"To {Transfer.Name}"; }
+        }
         public override string OnDisplay
         {
             get { return Amount > 0 ? $"Received {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {Transfer.Name}" : 
@@ -71,7 +82,26 @@ namespace ConsoleUI
                     $"Transfered {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} to {Transfer.Name} valued at {Transfer.Currency.Prefix}{Math.Abs(ForexAmount):n2}"; }
         }
     }
-    public class TradingTransactDetail : TransferTransactDetail
+    public class TradingFromTransactDetail : TransferTransactDetail
+    {
+        public string CategoryId { get; set; }
+        public string SubcategoryId { get; set; }
+        public Category Category { get; set; }
+        public Subcategory Subcategory { get; set; }
+        public override string OnColumn
+        {
+            get { return string.IsNullOrEmpty(SubcategoryId) ? $"{Category.Name}" : $"{Category.Name}:{Subcategory.Name}"; }
+        }
+        public override string OnDisplay
+        {
+            get
+            {
+                return Amount > 0 ? $"Credited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} to {OnColumn}" :
+                  $"Debited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {OnColumn}";
+            }
+        }
+    }
+    public class TradingTransactDetail : TradingFromTransactDetail
     {
         public decimal Price { get; set; }
         public override string OnDisplay
@@ -81,19 +111,11 @@ namespace ConsoleUI
                     $"Sold {Math.Abs(Amount):n0} unit(s) @{Transact.Account.Currency.Prefix}{Price:n2} valued {Transfer.Currency.Prefix}{Amount * Price:n2}"; }
         }
     }
-    public class TradingFromTransactDetail : TransferTransactDetail
+    public class TransactTag : iKey
     {
-        public string CategoryId { get; set; }
-        public string SubcategoryId { get; set; }
-        public Category Category { get; set; }
-        public Subcategory Subcategory { get; set; }
-        public override string OnDisplay
-        {
-            get
-            {
-                return Amount > 0 ? $"Credited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} to {Category.Name} {Subcategory.Name}" :
-                  $"Debited {Transact.Account.Currency.Prefix}{Math.Abs(Amount):n2} from {Category.Name} {Subcategory.Name}";
-            }
-        }
+        public string TransactId { get; set; }
+        public string TagId { get; set; }
+        public Transact Transact { get; set; }
+        public Tag Tag { get; set; }
     }
 }

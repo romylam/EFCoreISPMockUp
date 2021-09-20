@@ -202,6 +202,9 @@ namespace ConsoleUI.Migrations
                     b.Property<string>("PayeeId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Reference")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
@@ -236,6 +239,26 @@ namespace ConsoleUI.Migrations
                     b.ToTable("TransactDetails");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("TransactDetail");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TransactTag", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TagId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TransactId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TagId");
+
+                    b.HasIndex("TransactId");
+
+                    b.ToTable("TransactTags");
                 });
 
             modelBuilder.Entity("ConsoleUI.Type", b =>
@@ -368,7 +391,7 @@ namespace ConsoleUI.Migrations
 
             modelBuilder.Entity("ConsoleUI.TradingTransactDetail", b =>
                 {
-                    b.HasBaseType("ConsoleUI.TransferTransactDetail");
+                    b.HasBaseType("ConsoleUI.TradingFromTransactDetail");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
@@ -426,6 +449,21 @@ namespace ConsoleUI.Migrations
                     b.HasOne("ConsoleUI.Transact", "Transact")
                         .WithMany("TransactDetail")
                         .HasForeignKey("TransactId");
+
+                    b.Navigation("Transact");
+                });
+
+            modelBuilder.Entity("ConsoleUI.TransactTag", b =>
+                {
+                    b.HasOne("ConsoleUI.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId");
+
+                    b.HasOne("ConsoleUI.Transact", "Transact")
+                        .WithMany()
+                        .HasForeignKey("TransactId");
+
+                    b.Navigation("Tag");
 
                     b.Navigation("Transact");
                 });

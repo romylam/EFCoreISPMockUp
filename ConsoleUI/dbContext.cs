@@ -22,6 +22,7 @@ namespace ConsoleUI
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transact> Transacts { get; set; }
         public DbSet<TransactDetail> TransactDetails { get; set; }
+        public DbSet<TransactTag> TransactTags { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<GeneralAccount>();
@@ -36,13 +37,13 @@ namespace ConsoleUI
             modelBuilder.Entity<CreditTransactDetail>();
             modelBuilder.Entity<TransferTransactDetail>();
             modelBuilder.Entity<ForexTransactDetail>();
-            modelBuilder.Entity<TradingTransactDetail>();
             modelBuilder.Entity<TradingFromTransactDetail>()
                 .Property(c => c.CategoryId)
                 .HasColumnName(nameof(TradingFromTransactDetail.CategoryId));
             modelBuilder.Entity<TradingFromTransactDetail>()
                 .Property(s => s.SubcategoryId)
                 .HasColumnName(nameof(TradingFromTransactDetail.SubcategoryId));
+            modelBuilder.Entity<TradingTransactDetail>();
         }
     }
     public class dbContextFactory : IDesignTimeDbContextFactory<dbContext>

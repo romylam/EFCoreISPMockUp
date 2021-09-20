@@ -49,6 +49,9 @@ namespace ConsoleUI
             Subcategory subcategory = new Subcategory();
             List<Subcategory> subcategories = new List<Subcategory>();
 
+            Tag tag = new Tag();
+            List<Tag> tags = new List<Tag>();
+
             MasterKey masterKey = new MasterKey();
             List<MasterKey> masterKeys = new List<MasterKey>();
 
@@ -62,20 +65,23 @@ namespace ConsoleUI
 
             List<Transact> transacts = new List<Transact>();
             List<TransactDetail> transactDetails = new List<TransactDetail>();
+            List<TransactTag> transactTags = new List<TransactTag>();
 
             dbService<MasterKey> masterKeyDataService = new dbService<MasterKey>(context);
             dbService<Account> accountDataService = new dbService<Account>(context);
             dbService<Transact> transactDataService = new dbService<Transact>(context);
             dbService<TransactDetail> transactDetailDataService = new dbService<TransactDetail>(context);
+            dbService<TransactTag> transactTagDataService = new dbService<TransactTag>(context);
 
             PurgeTransactDetails(transactDetailDataService, transactDetails);
+            PurgeTransactTags(transactTagDataService, transactTags);
             PurgeTransact(transactDataService, transacts);
             PurgeAccount(accountDataService, accounts);
-            PurgeSystemSupport(context, groups, types, currencies, payees, categories, subcategories);
+            PurgeSystemSupport(context, groups, types, currencies, payees, categories, subcategories, tags);
             PurgeMasterKey(masterKeyDataService, masterKeys);
 
             CreateMasterKey(masterKeyDataService, masterKey);
-            CreateSystemSuppport(context, group, type, currency, payee, category, subcategory);
+            CreateSystemSuppport(context, group, type, currency, payee, category, subcategory, tag);
             CreateAccount(context, accountDataService, savingsAccount, checkingAccount, foreign1Account, foreign2Account, creditAccount, tradingAccount);
 
             accounts = accountDataService.GetAll();
@@ -89,7 +95,7 @@ namespace ConsoleUI
             tradingAccount = context.Accounts.FirstOrDefault(n => n.Name.Equals("Acme Shares"));
 
             Transact t1 = new Transact { Id = NextKey(context, "Transact"), Date = DateOnly.FromDateTime(DateTime.Today), 
-                                            PayeeId = getPayee(context, "Zen Company"), AccountId = savingsAccount.Id, Note = "" };
+                                            PayeeId = getPayee(context, "Zen Company"), AccountId = savingsAccount.Id, Reference = "SAL", Note = "" };
             transactDataService.Add(t1);
             TransactDetail t1n1 = new GeneralTransactDetail { Id = t1.Id + "-0001", TransactId = t1.Id, Order = 1, Amount = 1500, 
                 CategoryId = getCategory(context, "Income"), SubcategoryId = getSubcategory(context, "Salary") };
@@ -97,6 +103,8 @@ namespace ConsoleUI
             TransactDetail t1n2 = new GeneralTransactDetail { Id = t1.Id + "-0002", TransactId = t1.Id, Order = 2, Amount = -150, 
                 CategoryId = getCategory(context, "Tax"), SubcategoryId = getSubcategory(context, "Withholding Tax") };
             transactDetailDataService.Add(t1n2);
+            TransactTag t1t1 = new TransactTag { Id = t1.Id + "-0001", TransactId = t1.Id, TagId = getTag(context, "Payday") };
+            transactTagDataService.Add(t1t1);
 
             Transact t2 = new Transact { Id = NextKey(context, "Transact"), Date = t1.Date, Payee = t1.Payee, AccountId = checkingAccount.Id, Note = "" };
             transactDataService.Add(t2);
@@ -135,9 +143,13 @@ namespace ConsoleUI
             TransactDetail t5n1 = new ForexTransactDetail { Id = t5.Id + "-0001", TransactId = t5.Id, Order = 1, Amount = foreignAmount, 
                 TransferId = savingsAccount.Id, ForexAmount = originalAmount, LinkId = t4.Id, LinkOrder = 1 };
             transactDetailDataService.Add(t5n1);
+            TransactTag t4t1 = new TransactTag { Id = t4.Id + "-0001", TransactId = t4.Id, TagId = getTag(context, "Forex") };
+            transactTagDataService.Add(t4t1);
+            TransactTag t5t1 = new TransactTag { Id = t5.Id + "-0001", TransactId = t5.Id, TagId = getTag(context, "Forex") };
+            transactTagDataService.Add(t5t1);
 
             Transact t6 = new Transact { Id = NextKey(context, "Transact"), Date = DateOnly.FromDateTime(DateTime.Today), 
-                PayeeId = getPayee(context, "Win Shares"), AccountId = tradingAccount.Id, Note = "" };
+                PayeeId = getPayee(context, "Win Shares"), AccountId = tradingAccount.Id, Reference = "Buy", Note = "" };
             transactDataService.Add(t6);
             Transact t7 = new Transact { Id = NextKey(context, "Transact"), Date = DateOnly.FromDateTime(DateTime.Today), 
                 PayeeId = getPayee(context, "Win Shares"), AccountId = savingsAccount.Id, Note = "" };
@@ -145,10 +157,11 @@ namespace ConsoleUI
             Decimal tradingUnit = 150;
             Decimal tradingPrice = 1.75M;
             TransactDetail t6n1 = new TradingTransactDetail { Id = t6.Id + "-0001", TransactId = t6.Id, Order = 1, Amount = tradingUnit, Price = tradingPrice, 
-                TransferId = savingsAccount.Id, LinkId = t7.Id, LinkOrder = 1 };
+                TransferId = savingsAccount.Id, CategoryId = getCategory(context, "Shares"), SubcategoryId = getSubcategory(context, "Trading"), 
+                LinkId = t7.Id, LinkOrder = 1 };
             transactDetailDataService.Add(t6n1);
             TransactDetail t7n1 = new TradingFromTransactDetail { Id = t7.Id + "-0001", TransactId = t7.Id, Order = 1, Amount = tradingUnit * tradingPrice * -1, 
-                TransferId = tradingAccount.Id, CategoryId = getCategory(context, "Shares"), SubcategoryId = getSubcategory(context, "Buy"), 
+                TransferId = tradingAccount.Id, CategoryId = getCategory(context, "Shares"), SubcategoryId = getSubcategory(context, "Trading"), 
                 LinkId = t6.Id, LinkOrder = 1 };
             transactDetailDataService.Add(t7n1);
 
@@ -247,6 +260,16 @@ namespace ConsoleUI
                 Console.WriteLine("");
             }
             Console.WriteLine("");
+            foreach (var item in transacts)
+            {
+                Console.Write($"{item.Date:d} : {item.Payee.Name} : ");
+                foreach (var detail in item.TransactDetail)
+                {
+                    Console.WriteLine($"{detail.OnColumn} : {item.Account.Currency.Prefix}{detail.Amount:n2}");
+                }
+                Console.WriteLine("");
+            }
+            Console.WriteLine("");
         }
         private static void PurgeMasterKey(dbService<MasterKey> masterKeyDataService, List<MasterKey> masterKeys)
         {
@@ -256,7 +279,7 @@ namespace ConsoleUI
             Console.WriteLine("");
         }
         private static void PurgeSystemSupport(dbContext context, List<Group> groups, List<Type> types, List<Currency> currencies, List<Payee> payees, 
-            List<Category> categories, List<Subcategory> subcategories)
+            List<Category> categories, List<Subcategory> subcategories, List<Tag> tags)
         {
             groups = context.Groups.ToList();
             context.Groups.RemoveRange(groups);
@@ -287,6 +310,11 @@ namespace ConsoleUI
             context.Categories.RemoveRange(categories);
             Console.WriteLine("Categories purged.");
             Console.WriteLine("");
+
+            tags = context.Tags.ToList();
+            context.Tags.RemoveRange(tags);
+            Console.WriteLine("Tags purged.");
+            Console.WriteLine("");
         }
         private static void PurgeAccount(dbService<Account> accountDataService, List<Account> accounts)
         {
@@ -307,6 +335,13 @@ namespace ConsoleUI
             transactDetails = transactDetailDataService.GetAll();
             transactDetailDataService.DeleteRange(transactDetails);
             Console.WriteLine("Transaction Details purged.");
+            Console.WriteLine("");
+        }
+        private static void PurgeTransactTags(dbService<TransactTag> transactTagDataService, List<TransactTag> transactTags)
+        {
+            transactTags = transactTagDataService.GetAll();
+            transactTagDataService.DeleteRange(transactTags);
+            Console.WriteLine("Transaction Tags purged.");
             Console.WriteLine("");
         }
         private static void CreateMasterKey(dbService<MasterKey> masterKeyDataService, MasterKey masterKey)
@@ -330,7 +365,8 @@ namespace ConsoleUI
             Console.WriteLine("Master Keys created.");
             Console.WriteLine("");
         }
-        private static void CreateSystemSuppport(dbContext context, Group group, Type type, Currency currency, Payee payee, Category category, Subcategory subcategory)
+        private static void CreateSystemSuppport(dbContext context, Group group, Type type, Currency currency, Payee payee, 
+            Category category, Subcategory subcategory, Tag tag)
         {
             group = new Group { Id = NextKey(context, "Group"), Order = 1, Name = "Core" };
             context.Groups.Add(group);
@@ -393,11 +429,20 @@ namespace ConsoleUI
             context.Subcategories.Add(subcategory);
             subcategory = new Subcategory { Id = NextKey(context, "Subcategory"), Name = "Fruits", CategoryId = getCategory(context, "Food") };
             context.Subcategories.Add(subcategory);
-            subcategory = new Subcategory { Id = NextKey(context, "Subcategory"), Name = "Buy", CategoryId = getCategory(context, "Shares") };
-            context.Subcategories.Add(subcategory);
-            subcategory = new Subcategory { Id = NextKey(context, "Subcategory"), Name = "Sell", CategoryId = getCategory(context, "Shares") };
+            subcategory = new Subcategory { Id = NextKey(context, "Subcategory"), Name = "Trading", CategoryId = getCategory(context, "Shares") };
             context.Subcategories.Add(subcategory);
             Console.WriteLine("Subcategories created.");
+            Console.WriteLine("");
+
+            tag = new Tag { Id = NextKey(context, "Tag"), Name = "Payday" };
+            context.Tags.Add(tag);
+            tag = new Tag { Id = NextKey(context, "Tag"), Name = "Birthday" };
+            context.Tags.Add(tag);
+            tag = new Tag { Id = NextKey(context, "Tag"), Name = "Forex" };
+            context.Tags.Add(tag);
+            tag = new Tag { Id = NextKey(context, "Tag"), Name = "Trip" };
+            context.Tags.Add(tag);
+            Console.WriteLine("Tags created.");
             Console.WriteLine("");
         }
 
@@ -457,6 +502,11 @@ namespace ConsoleUI
         {
             Subcategory subcategory = context.Subcategories.FirstOrDefault(n => n.Name.Equals(name));
             return subcategory == null ? "Subcategory Not Found" : subcategory.Id;
+        }
+        private static string getTag(dbContext context, string name)
+        {
+            Tag tag = context.Tags.FirstOrDefault(n => n.Name.Equals(name));
+            return tag == null ? "Tag Not Found" : tag.Id;
         }
         public static string NextKey(dbContext context, string id)
         {
